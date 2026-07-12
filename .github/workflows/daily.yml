@@ -16,9 +16,12 @@
 # repo activity — re-enable from the Actions tab if that happens.
 name: daily-report
 
+# Schedule disabled: IBKR's edge blocks datacenter IPs (error 1020), so
+# GitHub-hosted runners cannot reach the Flex Web Service. Keep manual
+# dispatch for testing, or re-enable the cron on a self-hosted runner:
+#   schedule:
+#     - cron: "30 5 * * 2-6"
 on:
-  schedule:
-    - cron: "30 5 * * 2-6"  # 05:30 UTC Tue-Sat, after IBKR statement generation
   workflow_dispatch: {}
 
 jobs:
