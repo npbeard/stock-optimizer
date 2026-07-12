@@ -100,12 +100,29 @@ rates and Spain YTD realized gains.
 
 ### 5. (Optional) Run daily via GitHub Actions
 
-In a **private** GitHub repo (fork/mirror this one), add `IBKR_FLEX_TOKEN`
-and `IBKR_FLEX_QUERY_ID` as Actions secrets, and the included workflow
-(`.github/workflows/daily.yml`) runs each weekday morning and uploads the
-report as an artifact. The job deliberately refuses to run on public repos —
-artifacts on a public repo are downloadable by anyone, and the report is
-your full portfolio.
+The included workflow (`.github/workflows/daily.yml`) is designed to be safe
+**even on a public repo**:
+
+- The report is never printed to CI logs (public-repo logs are world-readable).
+- No state is cached between runs — the lot database is rebuilt from the
+  Flex statement each morning (the query's 365-day trade window covers the
+  wash-sale lookbacks).
+- Your gitignored `config/*.yaml` are materialized from base64 secrets.
+- The report artifact is **GPG-encrypted (AES-256)** before upload.
+
+Set five Actions secrets: `IBKR_FLEX_TOKEN`, `IBKR_FLEX_QUERY_ID`,
+`REPORT_PASSPHRASE`, and `CONFIG_SETTINGS_YAML` / `CONFIG_TARGETS_YAML`
+(`base64 -i config/settings.yaml`, same for targets). To read a morning's
+report:
+
+```bash
+gh run download -n portfolio-report-encrypted
+gpg -d --batch --passphrase "$REPORT_PASSPHRASE" report.md.gpg
+```
+
+Threat-model note: repo admins and anyone who can push workflow changes can
+exfiltrate secrets — keep the repo's write access to yourself. A private
+mirror remains the more conservative option.
 
 ## Known simplifications (Phase 1)
 

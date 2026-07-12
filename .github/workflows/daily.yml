@@ -1,21 +1,28 @@
-# Daily portfolio report. Requires two repository secrets:
-#   IBKR_FLEX_TOKEN, IBKR_FLEX_QUERY_ID
-# (Settings > Secrets and variables > Actions)
+# Daily portfolio report, safe to run even on a public repo:
+#   - the report is never printed to logs (publicly visible on public repos)
+#   - no database caching: state is rebuilt from the Flex statement each run
+#     (the Flex query's 365-day trade window covers the wash-sale checks)
+#   - the report artifact is GPG-encrypted; only you can decrypt it:
+#       gh run download -n portfolio-report-encrypted
+#       gpg -d --batch --passphrase "$REPORT_PASSPHRASE" report.md.gpg
+#
+# Required repository secrets (Settings > Secrets and variables > Actions):
+#   IBKR_FLEX_TOKEN, IBKR_FLEX_QUERY_ID, REPORT_PASSPHRASE
+# Required repository variables or committed config: config/settings.yaml and
+# config/targets.yaml are gitignored, so CI materializes them from the
+# CONFIG_SETTINGS_YAML / CONFIG_TARGETS_YAML secrets (base64).
+#
+# Note: GitHub disables cron workflows on public repos after 60 days without
+# repo activity — re-enable from the Actions tab if that happens.
 name: daily-report
 
 on:
   schedule:
-    # 05:30 UTC Tue-Sat = after IBKR finishes generating the prior
-    # US-session statement. Adjust to taste.
-    - cron: "30 5 * * 2-6"
+    - cron: "30 5 * * 2-6"  # 05:30 UTC Tue-Sat, after IBKR statement generation
   workflow_dispatch: {}
 
 jobs:
   report:
-    # Refuses to run on a public repo: the uploaded report artifact contains
-    # your full portfolio and would be downloadable by anyone. Run this from
-    # a private fork/mirror, or run locally instead.
-    if: github.event.repository.private
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,21 +34,32 @@ jobs:
       - name: Install
         run: pip install .
 
-      - name: Restore portfolio database
-        uses: actions/cache@v4
-        with:
-          path: data/portfolio.db
-          key: portfolio-db-${{ github.run_id }}
-          restore-keys: portfolio-db-
+      - name: Materialize private config
+        env:
+          SETTINGS_B64: ${{ secrets.CONFIG_SETTINGS_YAML }}
+          TARGETS_B64: ${{ secrets.CONFIG_TARGETS_YAML }}
+        run: |
+          echo "$SETTINGS_B64" | base64 -d > config/settings.yaml
+          echo "$TARGETS_B64" | base64 -d > config/targets.yaml
 
-      - name: Fetch statement and build report
+      - name: Fetch statement, prices, and build report (output suppressed)
         env:
           IBKR_FLEX_TOKEN: ${{ secrets.IBKR_FLEX_TOKEN }}
           IBKR_FLEX_QUERY_ID: ${{ secrets.IBKR_FLEX_QUERY_ID }}
-        run: portfolio-optimizer run
+        run: portfolio-optimizer run > /dev/null
 
-      - name: Upload report
+      - name: Encrypt report
+        env:
+          REPORT_PASSPHRASE: ${{ secrets.REPORT_PASSPHRASE }}
+        run: |
+          report=$(ls reports/*.md | tail -1)
+          gpg --symmetric --cipher-algo AES256 --batch \
+              --passphrase "$REPORT_PASSPHRASE" -o report.md.gpg "$report"
+          rm -rf reports data
+
+      - name: Upload encrypted report
         uses: actions/upload-artifact@v4
         with:
-          name: portfolio-report
-          path: reports/
+          name: portfolio-report-encrypted
+          path: report.md.gpg
+          retention-days: 30

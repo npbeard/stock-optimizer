@@ -166,7 +166,7 @@ def generate_trade_plan(
             continue
         remaining = amount
         for i, lot in enumerate(sorted_lots):
-            if lot.symbol != symbol or remaining <= 0:
+            if lot.symbol != symbol or remaining <= 1.0:
                 continue
             take = min(remaining, float(lot_value[i]))
             remaining -= take
