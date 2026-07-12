@@ -24,6 +24,19 @@ tax:
   # Simplified foreign-tax-credit model: effective tax on a sale = max(ES, US).
   # Good enough for ranking decisions; not a filing-grade calculation.
 
+optimizer:
+  # Extra buyable tickers beyond current holdings (careful: as a US person in
+  # the EU, individual stocks are safe; non-US funds/ETFs are PFICs).
+  universe: []
+  lookback_days: 756        # ~3y of daily returns for covariance/HRP
+  backtest_window_days: 504 # trailing window for walk-forward backtest
+  max_weight: 0.25          # per-asset cap on HRP target weight
+  risk_aversion: 5.0        # EUR penalty per unit of annualized tracking variance x wealth
+  tax_aversion: 1.0         # 1.0 = tax counted at face value; higher = more reluctant to sell
+  fee_rate: 0.001           # round-trip friction on turnover
+  min_trade_eur: 1000       # drop recommended trades smaller than this
+  min_cash_eur: 2000        # cash floor after trading
+
 report:
   # Minimum unrealized loss (EUR) for a lot to appear as a harvest candidate.
   harvest_min_loss_eur: 500

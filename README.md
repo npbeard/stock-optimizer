@@ -17,8 +17,21 @@ markdown report with:
 - Warnings for likely **PFICs** (non-US-domiciled funds/ETFs — punitive for
   US citizens) and unclassified tickers
 
-Phase 2 (planned): concrete rebalance/harvest trade recommendations with
-after-tax math. Phase 3 (optional): approval-gated execution via IB Gateway.
+**Phase 2 (this repo): tax-aware trade recommendations.** On top of the
+Phase 1 data layer:
+
+- Daily price history (yfinance → SQLite)
+- Target weights from **Hierarchical Risk Parity** on a **Ledoit-Wolf**
+  shrunk covariance (skfolio) — no return forecasts, robust at small N
+- A **convex trade optimizer** (CVXPY, after Moehle/Kochenderfer/Boyd/Ang
+  2021) that trades off tracking risk vs. the dual-regime tax cost of each
+  lot sale, respects Spain's mandatory FIFO, skips wash-blocked loss
+  credits, and emits a lot-level trade list — only when the risk reduction
+  is worth the tax
+- A walk-forward **backtest** (`portfolio-optimizer backtest`) comparing
+  HRP vs. equal weight vs. your current weights, out-of-sample
+
+Phase 3 (optional, planned): approval-gated execution via IB Gateway.
 
 ## Setup
 
@@ -64,6 +77,12 @@ portfolio-optimizer run
 `reports/` are gitignored — credentials, personal tax rates, holdings and
 statements never land in the repo.
 
+`run` = fetch statement + update prices + full report (including the
+recommended-trades section). Other commands: `prices`, `recommend`,
+`backtest`, `ingest <xml>`. Optimizer knobs (universe, risk/tax aversion,
+minimum trade size) live in the `optimizer:` section of
+`config/settings.yaml`.
+
 The report prints to stdout and is saved to `reports/YYYY-MM-DD.md`.
 Try it without credentials using the bundled sample data:
 
@@ -99,6 +118,11 @@ your full portfolio.
   4-year carryforward, 25% cap against other savings income) are not modeled.
 - Wash-sale checks look **backward** only; after harvesting, don't rebuy for
   30 days (US) / 2 months (Spain).
+- The trade optimizer's objective uses a linear per-lot tax relaxation; the
+  emitted trade list is then re-allocated strictly FIFO with exact
+  bracket-stacked Spanish tax, so the displayed numbers are the honest ones.
+- The backtest ignores taxes and transaction costs — it validates the
+  allocation engine, not realized performance.
 
 **Nothing here is tax advice.** Verify anything material with your asesor
 fiscal / US CPA — the dual-status situation has traps (PFIC, Modelo 720/721,

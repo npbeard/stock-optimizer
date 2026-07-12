@@ -6,6 +6,12 @@ requires-python = ">=3.11"
 dependencies = [
     "requests>=2.31",
     "PyYAML>=6.0",
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "yfinance>=0.2",
+    "scikit-learn>=1.4",
+    "skfolio>=0.5",
+    "cvxpy>=1.4",
 ]
 
 [project.optional-dependencies]
