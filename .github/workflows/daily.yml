@@ -1,0 +1,47 @@
+# Daily portfolio report. Requires two repository secrets:
+#   IBKR_FLEX_TOKEN, IBKR_FLEX_QUERY_ID
+# (Settings > Secrets and variables > Actions)
+name: daily-report
+
+on:
+  schedule:
+    # 05:30 UTC Tue-Sat = after IBKR finishes generating the prior
+    # US-session statement. Adjust to taste.
+    - cron: "30 5 * * 2-6"
+  workflow_dispatch: {}
+
+jobs:
+  report:
+    # Refuses to run on a public repo: the uploaded report artifact contains
+    # your full portfolio and would be downloadable by anyone. Run this from
+    # a private fork/mirror, or run locally instead.
+    if: github.event.repository.private
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: pip install .
+
+      - name: Restore portfolio database
+        uses: actions/cache@v4
+        with:
+          path: data/portfolio.db
+          key: portfolio-db-${{ github.run_id }}
+          restore-keys: portfolio-db-
+
+      - name: Fetch statement and build report
+        env:
+          IBKR_FLEX_TOKEN: ${{ secrets.IBKR_FLEX_TOKEN }}
+          IBKR_FLEX_QUERY_ID: ${{ secrets.IBKR_FLEX_QUERY_ID }}
+        run: portfolio-optimizer run
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-report
+          path: reports/

@@ -1,0 +1,22 @@
+<FlexQueryResponse queryName="daily-portfolio" type="AF">
+  <FlexStatements count="1">
+    <FlexStatement accountId="U1234567" fromDate="20260709" toDate="20260710" period="LastBusinessDay" whenGenerated="20260711;052210">
+      <OpenPositions>
+        <OpenPosition accountId="U1234567" currency="USD" fxRateToBase="0.86" assetCategory="STK" symbol="AAPL" description="APPLE INC" isin="US0378331005" reportDate="20260710" position="150" markPrice="210" positionValue="31500" costBasisMoney="26500" costBasisPrice="176.67" levelOfDetail="SUMMARY"/>
+        <OpenPosition accountId="U1234567" currency="USD" fxRateToBase="0.86" assetCategory="STK" symbol="AAPL" description="APPLE INC" isin="US0378331005" reportDate="20260710" position="100" markPrice="210" positionValue="21000" costBasisMoney="15000" costBasisPrice="150" openDateTime="20230515;093015" levelOfDetail="LOT"/>
+        <OpenPosition accountId="U1234567" currency="USD" fxRateToBase="0.86" assetCategory="STK" symbol="AAPL" description="APPLE INC" isin="US0378331005" reportDate="20260710" position="50" markPrice="210" positionValue="10500" costBasisMoney="11500" costBasisPrice="230" openDateTime="20260501;101500" levelOfDetail="LOT"/>
+        <OpenPosition accountId="U1234567" currency="USD" fxRateToBase="0.86" assetCategory="STK" symbol="MSFT" description="MICROSOFT CORP" isin="US5949181045" reportDate="20260710" position="40" markPrice="500" positionValue="20000" costBasisMoney="10000" costBasisPrice="250" openDateTime="20220110;110000" levelOfDetail="LOT"/>
+        <OpenPosition accountId="U1234567" currency="EUR" fxRateToBase="1" assetCategory="FUND" symbol="VUAA" description="VANGUARD S&amp;P 500 UCITS ETF" isin="IE00BFMXXD54" reportDate="20260710" position="100" markPrice="95" positionValue="9500" costBasisMoney="8000" costBasisPrice="80" openDateTime="20240320;100000" levelOfDetail="LOT"/>
+      </OpenPositions>
+      <Trades>
+        <Trade tradeID="1001" accountId="U1234567" currency="USD" fxRateToBase="0.86" assetCategory="STK" symbol="AAPL" isin="US0378331005" tradeDate="20260625" buySell="BUY" quantity="10" tradePrice="205" fifoPnlRealized="0"/>
+        <Trade tradeID="1002" accountId="U1234567" currency="USD" fxRateToBase="0.86" assetCategory="STK" symbol="MSFT" isin="US5949181045" tradeDate="20260301" buySell="SELL" quantity="-5" tradePrice="480" fifoPnlRealized="1150"/>
+      </Trades>
+      <CashReport>
+        <CashReportCurrency accountId="U1234567" currency="BASE_SUMMARY" endingCash="19300" fxRateToBase="1"/>
+        <CashReportCurrency accountId="U1234567" currency="EUR" endingCash="15000" fxRateToBase="1"/>
+        <CashReportCurrency accountId="U1234567" currency="USD" endingCash="5000" fxRateToBase="0.86"/>
+      </CashReport>
+    </FlexStatement>
+  </FlexStatements>
+</FlexQueryResponse>

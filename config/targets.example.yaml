@@ -1,0 +1,27 @@
+# Target allocation — copy to targets.yaml and edit to your strategy:
+#   cp config/targets.example.yaml config/targets.yaml
+# targets.yaml is gitignored: your holdings stay off the repo.
+#
+# Tickers not listed anywhere fall into an "unassigned" bucket and are
+# flagged in the report until you classify them.
+
+base_currency: EUR
+
+# Rebalance bands: a class is flagged when EITHER band is breached.
+bands:
+  absolute: 0.05     # e.g. target 40% -> alert outside 35%-45%
+  relative: 0.25     # e.g. target 10% -> alert outside 7.5%-12.5%
+
+asset_classes:
+  us_equity:
+    target: 0.60
+    tickers: [AAPL, MSFT]
+  intl_equity:
+    target: 0.20
+    tickers: [SAP]
+  fixed_income:
+    target: 0.15
+    tickers: []
+  cash:
+    target: 0.05
+    tickers: []      # cash balances are assigned here automatically

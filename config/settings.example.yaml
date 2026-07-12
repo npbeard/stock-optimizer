@@ -1,0 +1,32 @@
+# Tax and reporting parameters — copy to settings.yaml and edit:
+#   cp config/settings.example.yaml config/settings.yaml
+# settings.yaml is gitignored: your personal rates stay off the repo.
+# All amounts in EUR unless noted.
+
+tax:
+  # --- Spain (residence country, taxes first) ---
+  # Savings-income brackets, marginal rates (2025 law — verify yearly).
+  spain_brackets:
+    - [6000, 0.19]
+    - [50000, 0.21]
+    - [200000, 0.23]
+    - [300000, 0.27]
+    - [.inf, 0.30]
+  # Gains already realized this calendar year in Spain (stacks brackets).
+  # Phase 1: set manually; later derived from the trades table.
+  es_ytd_realized_gains: 0
+
+  # --- US (citizenship-based taxation) ---
+  us_ltcg_rate: 0.15        # your long-term capital gains bracket (0 / 0.15 / 0.20)
+  us_stcg_rate: 0.32        # your ordinary marginal rate for short-term gains
+  apply_niit: true          # +3.8% Net Investment Income Tax if MAGI over threshold
+
+  # Simplified foreign-tax-credit model: effective tax on a sale = max(ES, US).
+  # Good enough for ranking decisions; not a filing-grade calculation.
+
+report:
+  # Minimum unrealized loss (EUR) for a lot to appear as a harvest candidate.
+  harvest_min_loss_eur: 500
+  # Wash-sale lookback windows checked against recent buys in the trades table.
+  wash_sale_days_us: 30     # 30 days before/after (IRC §1091)
+  wash_sale_days_es: 61     # 2 months (norma antiaplicación, listed securities)
